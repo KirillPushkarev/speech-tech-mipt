@@ -38,7 +38,6 @@ class ASRDataset(torch.utils.data.Dataset):
 
 
 def collate_fn(batch):
-
     features, features_length, targets, targets_length = list(zip(*batch))
     features_padded = torch.nn.utils.rnn.pad_sequence(
         features, batch_first=True

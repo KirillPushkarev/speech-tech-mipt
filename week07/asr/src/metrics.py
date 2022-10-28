@@ -7,7 +7,6 @@ from torchmetrics import Metric
 
 class WER(Metric):
     def __init__(self):
-
         super().__init__()
 
         self.add_state(

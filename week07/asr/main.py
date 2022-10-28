@@ -5,9 +5,9 @@ import pytorch_lightning as pl
 
 from src.model import QuartzNetCTC, logger
 
-@hydra.main(config_path="conf", config_name="quarznet_5x5_ru")
-def main(conf: omegaconf.DictConfig) -> None:
 
+@hydra.main(config_path="conf", config_name="quartznet_5x5_ru")
+def main(conf: omegaconf.DictConfig) -> None:
     model = QuartzNetCTC(conf)
 
     if conf.model.init_weights:

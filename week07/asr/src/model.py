@@ -37,7 +37,6 @@ class QuartzNetCTC(pl.LightningModule):
     def forward(
         self, features: torch.Tensor, features_len: torch.Tensor
     ) -> torch.Tensor:
-
         encoded, encoded_len = self.encoder(features, features_len)
 
         logprobs = self.decoder(encoded)
@@ -57,7 +56,6 @@ class QuartzNetCTC(pl.LightningModule):
         log = {"train_loss": loss, "lr": self.optimizers().param_groups[0]["lr"]}
 
         if (batch_nb + 1) % self.log_every_n_steps == 0:
-
             refs = self.decoder.decode(token_ids=targets, token_ids_length=target_len)
             hyps = self.decoder.decode(
                 token_ids=preds, token_ids_length=encoded_len, unique_consecutive=True

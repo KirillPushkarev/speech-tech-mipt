@@ -10,7 +10,6 @@ class SpecScaler(torch.nn.Module):
 
 
 def get_transform(conf) -> Callable:
-
     name_to_transform = {
         "mel_spectrogram": torchaudio.transforms.MelSpectrogram,
         "log_scaler": SpecScaler,

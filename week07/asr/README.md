@@ -16,7 +16,7 @@ $ export CUDA_VISIBLE_DEVICES=1,2,3,4,5,6 && python main.py trainer.devices=6 tr
 ```
 
 Что требуется сделать:
-* скачать [данные](https://drive.google.com/file/d/1TEOR60JXgOkPrC6jSLhuR2Nb6eCegjpd/view?usp=sharing) и распоковать их в `./data`
+* скачать [данные](https://drive.google.com/file/d/1TEOR60JXgOkPrC6jSLhuR2Nb6eCegjpd/view?usp=sharing) и распаковать их в `./data`
 * разобраться в коде `main.py` и `src/*.py`
 * реализовать классы в [`src/encoder.py`](src/encoder.py)
 * проверить, что у реализованного энкодера число параметров совпадает со значением в статье:

@@ -1,11 +1,9 @@
 model:
-
   init_weights: null
   enc_filters: 1024
   labels: [ " ", "а", "б", "в", "г", "д", "е", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я" ]
 
   encoder:
-
     repeat: 5
     dropout: 0.0
     feat_in: 64
@@ -14,7 +12,7 @@ model:
       - filters: 256
         repeat: 1
         kernel_size: 33
-        stride: 4
+        stride: 2
         dilation: 1
         residual: false
         dropout: ${model.encoder.dropout}
@@ -99,7 +97,6 @@ optim:
     params:
       warmup_steps: 10
       max_steps: ${trainer.max_steps}
-
 
 train_dataloader:
   num_workers: 2
