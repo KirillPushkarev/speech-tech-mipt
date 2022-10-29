@@ -90,7 +90,7 @@ optim:
     name: 
       Adam
     params:
-      lr: 1e-3
+      lr: 3e-4
   scheduler:
     name:
       CosineAnnealing
@@ -99,8 +99,8 @@ optim:
       max_steps: ${trainer.max_steps}
 
 train_dataloader:
-  num_workers: 2
-  batch_size: 16
+  num_workers: 4
+  batch_size: 4
   prefetch_factor: 1
   dataset:
     manifest_name: train_opus/manifest.jsonl

@@ -6,6 +6,9 @@ from torchmetrics import Metric
 
 
 class WER(Metric):
+    higher_is_better: bool = False
+    full_state_update: bool = True
+
     def __init__(self):
         super().__init__()
 
@@ -28,10 +31,11 @@ class WER(Metric):
             dist = editdistance.eval(ref_tokens, hyp_tokens)
             word_errors += dist
             words += len(ref_tokens)
-        self.word_errors = torch.tensor(
+
+        self.word_errors += torch.tensor(
             word_errors, device=self.word_errors.device, dtype=self.word_errors.dtype
         )
-        self.words = torch.tensor(
+        self.words += torch.tensor(
             words, device=self.words.device, dtype=self.words.dtype
         )
 

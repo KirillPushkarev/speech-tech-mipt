@@ -28,9 +28,9 @@ class QuartzNetCTC(pl.LightningModule):
             conf.trainer.log_every_n_steps if "log_every_n_steps" in conf.trainer else 1
         )
 
-        self.wer = WER()
+        self.metric = WER()
 
-        self.ctc_loss = nn.CTCLoss(
+        self.loss = nn.CTCLoss(
             blank=self.decoder.blank_id, zero_infinity=True, reduction="none"
         )
 
@@ -44,28 +44,28 @@ class QuartzNetCTC(pl.LightningModule):
 
         return logprobs, encoded_len, preds
 
-    def training_step(self, batch: Any, batch_nb: int):
+    def training_step(self, batch: Any, batch_idx: int):
         features, features_len, targets, target_len = batch
 
         logprobs, encoded_len, preds = self.forward(features, features_len)
 
-        loss = self.ctc_loss(
+        loss = self.loss(
             logprobs.transpose(1, 0), targets, encoded_len, target_len
         ).mean()
 
         log = {"train_loss": loss, "lr": self.optimizers().param_groups[0]["lr"]}
 
-        if (batch_nb + 1) % self.log_every_n_steps == 0:
+        if (batch_idx + 1) % self.log_every_n_steps == 0:
             refs = self.decoder.decode(token_ids=targets, token_ids_length=target_len)
             hyps = self.decoder.decode(
                 token_ids=preds, token_ids_length=encoded_len, unique_consecutive=True
             )
             logger.info("reference : %s", refs[0])
             logger.info("prediction: %s", hyps[0])
-            self.wer.update(references=refs, hypotheses=hyps)
-            wer, _, _ = self.wer.compute()
+            self.metric.update(references=refs, hypotheses=hyps)
+            wer, _, _ = self.metric.compute()
 
-            self.wer.reset()
+            self.metric.reset()
 
             log["train_wer"] = wer
 
@@ -73,12 +73,12 @@ class QuartzNetCTC(pl.LightningModule):
 
         return {"loss": loss}
 
-    def validation_step(self, batch: Any, batch_nb):
+    def validation_step(self, batch: Any, batch_idx):
         features, features_len, targets, target_len = batch
 
         logprobs, encoded_len, preds = self.forward(features, features_len)
 
-        loss = self.ctc_loss(logprobs.transpose(1, 0), targets, encoded_len, target_len)
+        loss = self.loss(logprobs.transpose(1, 0), targets, encoded_len, target_len)
 
         refs = self.decoder.decode(token_ids=targets, token_ids_length=target_len)
         hyps = self.decoder.decode(
@@ -86,10 +86,10 @@ class QuartzNetCTC(pl.LightningModule):
         )
         logger.info("reference : %s", refs[0])
         logger.info("prediction: %s", hyps[0])
-        self.wer.update(references=refs, hypotheses=hyps)
-        _, word_errors, words = self.wer.compute()
+        self.metric.update(references=refs, hypotheses=hyps)
+        _, word_errors, words = self.metric.compute()
 
-        self.wer.reset()
+        self.metric.reset()
 
         return {"val_loss": loss, "val_word_errors": word_errors, "val_words": words}
 

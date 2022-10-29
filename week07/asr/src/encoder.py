@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import ReLU
 
 
-def get_conv_and_norm_layer(
+def get_conv_and_norm_layers(
         in_channels: int,
         out_channels: int,
         kernel_size: int,
@@ -45,49 +45,18 @@ def get_conv_and_norm_layer(
         ]
 
     layers.append(nn.BatchNorm1d(out_channels, eps=1e-3, momentum=0.1))
-    return nn.Sequential(*layers)
+    return layers
 
 
-def get_activation_and_dropout_layer(activation=ReLU, drop_prob=0.2):
+def get_activation_and_dropout_layers(activation=ReLU, drop_prob=0.2):
     layers = [activation(), nn.Dropout(p=drop_prob)]
-    return nn.Sequential(*layers)
+    return layers
 
 
 def get_same_padding(kernel_size: int, stride: int, dilation: int) -> int:
     if stride > 1 and dilation > 1:
         raise ValueError("Only stride OR dilation may be greater than 1")
     return (dilation * (kernel_size - 1)) // 2
-
-
-class QuartzNetSubBlock(torch.nn.Module):
-    def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            kernel_size: int,
-            stride: int,
-            dilation: int,
-            padding: int,
-            activation,
-            separable: bool
-    ):
-        super().__init__()
-
-        self.model = nn.Sequential(
-            get_conv_and_norm_layer(
-                in_channels,
-                out_channels,
-                kernel_size,
-                stride,
-                dilation,
-                padding,
-                separable=separable
-            ),
-            get_activation_and_dropout_layer(activation=activation)
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x)
 
 
 class QuartzNetBlock(torch.nn.Module):
@@ -110,22 +79,24 @@ class QuartzNetBlock(torch.nn.Module):
         sub_blocks = []
         sub_block_input_channels = feat_in
         for block in range(repeat - 1):
-            sub_blocks.append(
-                QuartzNetSubBlock(
+            sub_blocks.extend(
+                get_conv_and_norm_layers(
                     sub_block_input_channels,
                     filters,
                     kernel_size,
                     stride,
                     dilation,
                     padding,
-                    activation=ReLU,
                     separable=separable
                 )
             )
+            sub_blocks.extend(
+                get_activation_and_dropout_layers(activation=ReLU)
+            )
             sub_block_input_channels = filters
 
-        sub_blocks.extend([
-            get_conv_and_norm_layer(
+        sub_blocks.extend(
+            get_conv_and_norm_layers(
                 sub_block_input_channels,
                 filters,
                 kernel_size,
@@ -134,13 +105,13 @@ class QuartzNetBlock(torch.nn.Module):
                 padding,
                 separable=separable
             )
-        ])
+        )
 
         self.mainline = nn.Sequential(*sub_blocks)
 
         if residual:
             self.residual = nn.Sequential(
-                get_conv_and_norm_layer(
+                *get_conv_and_norm_layers(
                     feat_in,
                     filters,
                     kernel_size=1,
@@ -153,13 +124,13 @@ class QuartzNetBlock(torch.nn.Module):
         else:
             self.residual = None
 
-        self.out = get_activation_and_dropout_layer(activation=ReLU, drop_prob=dropout)
+        self.out = nn.Sequential(*get_activation_and_dropout_layers(activation=ReLU, drop_prob=dropout))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.residual:
-            return self.out(self.self.mainline(x) + self.residual(x))
+            return self.out(self.mainline(x) + self.residual(x))
 
-        return self.out(self.self.mainline(x))
+        return self.out(self.mainline(x))
 
 
 class QuartzNet(nn.Module):
