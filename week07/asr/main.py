@@ -13,7 +13,7 @@ def main(conf: omegaconf.DictConfig) -> None:
 
     if conf.model.init_weights:
         ckpt = torch.load(conf.model.init_weights, map_location="cpu")
-        model.load_state_dict(map_model_state_dict(ckpt["state_dict"]))
+        model.load_state_dict(ckpt["state_dict"])
         logger.info("Successfully loaded initial weights")
 
     trainer = pl.Trainer(

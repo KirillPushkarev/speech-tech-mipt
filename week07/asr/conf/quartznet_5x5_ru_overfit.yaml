@@ -90,7 +90,7 @@ optim:
     name: 
       Adam
     params:
-      lr: 3e-4
+      lr: 5e-4
   scheduler:
     name:
       CosineAnnealing
@@ -134,5 +134,7 @@ trainer:
   accumulate_grad_batches: 1
   gradient_clip_val: 1.0
   accelerator: auto
-  max_steps: 300
+  overfit_batches: 20
+  limit_val_batches: 0
+  max_steps: 5000
   devices: 1
