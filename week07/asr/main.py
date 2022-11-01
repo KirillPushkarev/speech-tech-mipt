@@ -4,7 +4,6 @@ import pytorch_lightning as pl
 import torch
 
 from src.model import QuartzNetCTC, logger
-from src.utils import map_model_state_dict
 
 
 @hydra.main(config_path="conf", config_name="quartznet_5x5_ru")
