@@ -12,7 +12,7 @@ model:
       - filters: 256
         repeat: 1
         kernel_size: 33
-        stride: 2
+        stride: 4
         dilation: 1
         residual: false
         dropout: ${model.encoder.dropout}
@@ -101,7 +101,7 @@ optim:
 train_dataloader:
   num_workers: 4
   batch_size: 4
-  prefetch_factor: 1
+  prefetch_factor: 2
   dataset:
     manifest_name: train_opus/manifest.jsonl
     labels: ${model.labels}
@@ -134,5 +134,6 @@ trainer:
   accumulate_grad_batches: 1
   gradient_clip_val: 1.0
   accelerator: auto
+  overfit_batches: 30
   max_steps: 300
   devices: 1

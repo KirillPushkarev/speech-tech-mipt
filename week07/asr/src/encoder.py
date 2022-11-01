@@ -107,10 +107,10 @@ class QuartzNetBlock(torch.nn.Module):
             )
         )
 
-        self.mainline = nn.Sequential(*sub_blocks)
+        self.conv = nn.Sequential(*sub_blocks)
 
         if residual:
-            self.residual = nn.Sequential(
+            self.res = nn.Sequential(
                 *get_conv_and_norm_layers(
                     feat_in,
                     filters,
@@ -122,15 +122,15 @@ class QuartzNetBlock(torch.nn.Module):
                 )
             )
         else:
-            self.residual = None
+            self.res = None
 
         self.out = nn.Sequential(*get_activation_and_dropout_layers(activation=ReLU, drop_prob=dropout))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if self.residual:
-            return self.out(self.mainline(x) + self.residual(x))
+        if self.res:
+            return self.out(self.conv(x) + self.res(x))
 
-        return self.out(self.mainline(x))
+        return self.out(self.conv(x))
 
 
 class QuartzNet(nn.Module):
